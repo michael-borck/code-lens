@@ -171,7 +171,7 @@ class PythonSimilarityAnalyzer:
 
     def _extract_ast_features(self, tree: ast.AST) -> dict[str, Any]:
         """Extract structural features from AST"""
-        features = {
+        features: dict[str, Any] = {
             'node_types': [],
             'function_names': [],
             'class_names': [],
@@ -388,10 +388,10 @@ class PythonSimilarityAnalyzer:
 
     def _compare_functions(self, func1: dict[str, Any], func2: dict[str, Any]) -> float:
         """Compare two function signatures"""
-        score = 0.0
+        score: float = 0.0
 
         # Name similarity (less weight if names are obviously different)
-        name_sim = difflib.SequenceMatcher(None, func1['name'], func2['name']).ratio()
+        name_sim: float = difflib.SequenceMatcher(None, func1['name'], func2['name']).ratio()
         score += name_sim * 0.3
 
         # Argument similarity

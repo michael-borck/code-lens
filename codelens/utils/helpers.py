@@ -55,11 +55,12 @@ def format_file_size(size_bytes: int) -> str:
 
     size_names = ["B", "KB", "MB", "GB"]
     i = 0
-    while size_bytes >= 1024 and i < len(size_names) - 1:
-        size_bytes /= 1024.0
+    size_float = float(size_bytes)
+    while size_float >= 1024 and i < len(size_names) - 1:
+        size_float /= 1024.0
         i += 1
 
-    return f"{size_bytes:.1f} {size_names[i]}"
+    return f"{size_float:.1f} {size_names[i]}"
 
 
 def extract_functions_from_python(code: str) -> list[dict[str, Any]]:

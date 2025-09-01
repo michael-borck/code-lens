@@ -76,7 +76,7 @@ class AnalysisRequest(BaseModel):
     analyzer_config: dict[str, Any] | None = Field(None, description="Custom analyzer config")
 
     @validator('code')
-    def validate_code_length(cls, v):
+    def validate_code_length(cls, v: str) -> str:
         if len(v.encode('utf-8')) > 1024 * 1024:  # 1MB limit
             raise ValueError('Code size exceeds 1MB limit')
         return v
@@ -84,7 +84,7 @@ class AnalysisRequest(BaseModel):
 
 class BatchAnalysisRequest(BaseModel):
     """Request schema for batch analysis"""
-    files: list[dict[str, str]] = Field(..., min_items=1, description="List of files with code and path")
+    files: list[dict[str, str]] = Field(..., min_length=1, description="List of files with code and path")
     language: AnalysisLanguage = Field(AnalysisLanguage.PYTHON, description="Programming language")
     assignment_id: int | None = Field(None, description="Assignment ID")
     rubric_id: int | None = Field(None, description="Rubric ID for grading")
@@ -94,7 +94,7 @@ class BatchAnalysisRequest(BaseModel):
     parallel_processing: bool = Field(True, description="Process files in parallel")
 
     @validator('files')
-    def validate_files(cls, v):
+    def validate_files(cls, v: list[dict[str, str]]) -> list[dict[str, str]]:
         if len(v) > 100:  # Max 100 files per batch
             raise ValueError('Maximum 100 files per batch')
         for file_info in v:
@@ -158,7 +158,7 @@ class AnalysisResponse(BaseModel):
     syntax_valid: bool = True
     syntax_errors: list[AnalysisIssueSchema] = Field(default_factory=list)
     issues: list[AnalysisIssueSchema] = Field(default_factory=list)
-    metrics: CodeMetricsSchema = Field(default_factory=CodeMetricsSchema)
+    metrics: CodeMetricsSchema = CodeMetricsSchema()
 
     # Execution results (if requested)
     execution_result: ExecutionResultSchema | None = None

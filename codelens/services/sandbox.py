@@ -10,9 +10,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import docker
+import docker  # type: ignore[import-untyped]
 import structlog
-from docker.errors import ContainerError, DockerException, ImageNotFound
+from docker.errors import ContainerError, DockerException, ImageNotFound  # type: ignore[import-untyped]
 
 from codelens.core.config import settings
 
@@ -37,11 +37,11 @@ class TestResult:
     """Result of running tests against code"""
     total_tests: int = 0
     passed_tests: int = 0
-    failed_tests: list[dict[str, Any]] = None
+    failed_tests: list[dict[str, Any]] | None = None
     test_output: str = ""
     execution_result: ExecutionResult | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.failed_tests is None:
             self.failed_tests = []
 
@@ -49,7 +49,7 @@ class TestResult:
 class DockerSandbox:
     """Docker-based sandbox for secure code execution"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.client: docker.DockerClient | None = None
         self.image_name = settings.docker_image
         self.timeout = settings.analyzer.execution_timeout

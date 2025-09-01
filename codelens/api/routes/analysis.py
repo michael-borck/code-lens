@@ -32,7 +32,7 @@ logger = structlog.get_logger()
 router = APIRouter()
 
 
-def convert_analysis_issues(issues) -> list[AnalysisIssueSchema]:
+def convert_analysis_issues(issues: list[Any]) -> list[AnalysisIssueSchema]:
     """Convert analyzer issues to schema format"""
     return [
         AnalysisIssueSchema(
@@ -48,7 +48,7 @@ def convert_analysis_issues(issues) -> list[AnalysisIssueSchema]:
     ]
 
 
-def convert_metrics(metrics) -> CodeMetricsSchema:
+def convert_metrics(metrics: Any) -> CodeMetricsSchema:
     """Convert analyzer metrics to schema format"""
     return CodeMetricsSchema(
         lines_of_code=metrics.lines_of_code,
@@ -68,10 +68,10 @@ async def store_analysis_report(
     request: AnalysisRequest,
     submission_id: str,
     db: AsyncSession,
-    grade_breakdown: dict[str, float] = None,
-    total_score: float = None,
-    test_result = None,
-    similarity_result = None
+    grade_breakdown: dict[str, float] | None = None,
+    total_score: float | None = None,
+    test_result: Any = None,
+    similarity_result: Any = None
 ) -> None:
     """Store analysis report in database"""
     try:
@@ -146,7 +146,7 @@ async def analyze_python_code(
     request: AnalysisRequest,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db)
-):
+) -> AnalysisResponse:
     """Analyze Python code submission"""
     start_time = datetime.utcnow()
     submission_id = str(uuid.uuid4())
@@ -169,7 +169,9 @@ async def analyze_python_code(
                 submission_id=submission_id,
                 error_message="Static analysis failed",
                 issues=convert_analysis_issues(analysis_result.issues),
-                processing_time=(datetime.utcnow() - start_time).total_seconds()
+                processing_time=(datetime.utcnow() - start_time).total_seconds(),
+                total_score=0.0,
+                max_score=100.0
             )
 
         # Code execution (if requested)
@@ -242,7 +244,8 @@ async def analyze_python_code(
             test_result=test_result,
             similarity_result=similarity_result,
             grade_breakdown=grade_breakdown,
-            total_score=total_score,
+            total_score=total_score or 0.0,
+            max_score=100.0,
             feedback=feedback,
             analysis_version=analysis_result.analyzer_version,
             processing_time=analysis_result.execution_time,
@@ -259,7 +262,7 @@ async def analyze_python_code(
                 submission_id,
                 db,
                 grade_breakdown.dict() if grade_breakdown else None,
-                total_score,
+                total_score or 0.0,
                 test_result,
                 similarity_result
             )
@@ -284,7 +287,7 @@ async def analyze_batch(
     request: BatchAnalysisRequest,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db)
-):
+) -> BatchAnalysisResponse:
     """Analyze multiple code files in batch"""
     datetime.utcnow()
     batch_id = str(uuid.uuid4())
@@ -309,7 +312,12 @@ async def analyze_batch(
                     assignment_id=request.assignment_id,
                     student_id=file_info.get("student_id"),
                     student_name=file_info.get("student_name"),
-                    check_similarity=request.check_similarity
+                    check_similarity=request.check_similarity,
+                    run_tests=False,
+                    test_cases=[],
+                    execute_code=False,
+                    input_data=None,
+                    analyzer_config=None
                 )
 
                 # Analyze individual file
@@ -334,7 +342,9 @@ async def analyze_batch(
                     success=False,
                     submission_id=str(uuid.uuid4()),
                     error_message=f"Processing failed: {str(e)}",
-                    processing_time=0.0
+                    processing_time=0.0,
+                    total_score=0.0,
+                    max_score=100.0
                 )
                 results.append(error_result)
 
@@ -385,7 +395,7 @@ async def analyze_batch(
 
 
 @router.get("/status")
-async def get_analysis_status():
+async def get_analysis_status() -> dict[str, Any]:
     """Get analyzer status and configuration"""
     return {
         "status": "healthy",
@@ -402,7 +412,7 @@ async def get_analysis_status():
 
 
 @router.get("/tools")
-async def get_available_tools():
+async def get_available_tools() -> dict[str, Any]:
     """Get information about available analysis tools"""
     return {
         "python": {

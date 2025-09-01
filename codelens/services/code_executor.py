@@ -34,10 +34,10 @@ class CodeExecutionRequest:
 class ValidationResult:
     """Result of code validation"""
     is_valid: bool = True
-    issues: list[str] = None
-    security_risks: list[str] = None
+    issues: list[str] | None = None
+    security_risks: list[str] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.issues is None:
             self.issues = []
         if self.security_risks is None:
@@ -57,7 +57,7 @@ class CodeExecutionResponse:
 class CodeExecutorService:
     """High-level service for executing student code safely"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.sandbox = sandbox
 
     async def execute_code(self, request: CodeExecutionRequest) -> CodeExecutionResponse:
