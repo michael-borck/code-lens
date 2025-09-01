@@ -6,7 +6,8 @@ from datetime import datetime
 from typing import Any
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import status as http_status
 from pydantic import BaseModel
 from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -111,7 +112,7 @@ async def list_reports(
     limit: int = Query(50, le=500),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db)
-):
+) -> list[ReportSummary]:
     """List analysis reports with filtering options"""
     try:
         query = select(AnalysisReport)
@@ -145,7 +146,7 @@ async def list_reports(
     except Exception as e:
         logger.error("Failed to list reports", error=str(e))
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to list reports: {str(e)}"
         ) from None
 
@@ -154,7 +155,7 @@ async def list_reports(
 async def get_report(
     report_id: int,
     db: AsyncSession = Depends(get_db)
-):
+) -> ReportDetail:
     """Get detailed analysis report by ID"""
     try:
         result = await db.execute(
@@ -164,7 +165,7 @@ async def get_report(
 
         if not report:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=http_status.HTTP_404_NOT_FOUND,
                 detail=f"Report {report_id} not found"
             ) from None
 
@@ -177,7 +178,7 @@ async def get_report(
     except Exception as e:
         logger.error("Failed to get report", report_id=report_id, error=str(e))
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get report: {str(e)}"
         ) from None
 
@@ -186,7 +187,7 @@ async def get_report(
 async def get_report_by_submission(
     submission_id: str,
     db: AsyncSession = Depends(get_db)
-):
+) -> ReportDetail:
     """Get analysis report by submission ID"""
     try:
         result = await db.execute(
@@ -196,7 +197,7 @@ async def get_report_by_submission(
 
         if not report:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=http_status.HTTP_404_NOT_FOUND,
                 detail=f"Report for submission {submission_id} not found"
             ) from None
 
@@ -210,7 +211,7 @@ async def get_report_by_submission(
         logger.error("Failed to get report by submission",
                    submission_id=submission_id, error=str(e))
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get report: {str(e)}"
         ) from None
 
@@ -219,7 +220,7 @@ async def get_report_by_submission(
 async def get_assignment_statistics(
     assignment_id: int,
     db: AsyncSession = Depends(get_db)
-):
+) -> AssignmentStatistics:
     """Get statistics for an assignment"""
     try:
         # Verify assignment exists
@@ -230,7 +231,7 @@ async def get_assignment_statistics(
 
         if not assignment:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=http_status.HTTP_404_NOT_FOUND,
                 detail=f"Assignment {assignment_id} not found"
             ) from None
 
@@ -318,7 +319,7 @@ async def get_assignment_statistics(
         logger.error("Failed to get assignment statistics",
                    assignment_id=assignment_id, error=str(e))
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get assignment statistics: {str(e)}"
         ) from None
 
@@ -330,7 +331,7 @@ async def get_student_reports(
     limit: int = Query(50, le=500),
     offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db)
-):
+) -> list[ReportSummary]:
     """Get all reports for a specific student"""
     try:
         query = select(AnalysisReport).where(AnalysisReport.student_id == student_id)
@@ -354,7 +355,7 @@ async def get_student_reports(
         logger.error("Failed to get student reports",
                    student_id=student_id, error=str(e))
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get student reports: {str(e)}"
         ) from None
 
@@ -363,7 +364,7 @@ async def get_student_reports(
 async def get_similarity_matches(
     report_id: int,
     db: AsyncSession = Depends(get_db)
-):
+) -> list[SimilarityMatchResponse]:
     """Get similarity matches for a specific report"""
     try:
         # Verify report exists
@@ -374,7 +375,7 @@ async def get_similarity_matches(
 
         if not report:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=http_status.HTTP_404_NOT_FOUND,
                 detail=f"Report {report_id} not found"
             ) from None
 
@@ -398,16 +399,16 @@ async def get_similarity_matches(
         logger.error("Failed to get similarity matches",
                    report_id=report_id, error=str(e))
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get similarity matches: {str(e)}"
         ) from None
 
 
-@router.delete("/{report_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{report_id}", status_code=http_status.HTTP_204_NO_CONTENT)
 async def delete_report(
     report_id: int,
     db: AsyncSession = Depends(get_db)
-):
+) -> None:
     """Delete an analysis report"""
     try:
         result = await db.execute(
@@ -417,7 +418,7 @@ async def delete_report(
 
         if not report:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=http_status.HTTP_404_NOT_FOUND,
                 detail=f"Report {report_id} not found"
             ) from None
 
@@ -432,6 +433,6 @@ async def delete_report(
         logger.error("Failed to delete report", report_id=report_id, error=str(e))
         await db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete report: {str(e)}"
         ) from None

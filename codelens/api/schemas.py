@@ -158,7 +158,17 @@ class AnalysisResponse(BaseModel):
     syntax_valid: bool = True
     syntax_errors: list[AnalysisIssueSchema] = Field(default_factory=list)
     issues: list[AnalysisIssueSchema] = Field(default_factory=list)
-    metrics: CodeMetricsSchema = CodeMetricsSchema()
+    metrics: CodeMetricsSchema = Field(default_factory=lambda: CodeMetricsSchema(
+        lines_of_code=0,
+        lines_of_comments=0,
+        blank_lines=0,
+        cyclomatic_complexity=0,
+        cognitive_complexity=0,
+        function_count=0,
+        class_count=0,
+        max_nesting_depth=0,
+        maintainability_index=0.0
+    ))
 
     # Execution results (if requested)
     execution_result: ExecutionResultSchema | None = None

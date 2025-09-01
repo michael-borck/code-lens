@@ -191,7 +191,7 @@ class DockerSandbox:
         volumes: dict[str, dict[str, str]],
         working_dir: str = "/workspace",
         input_file: str | None = None,
-        start_time: float = None
+        start_time: float | None = None
     ) -> ExecutionResult:
         """Run a command in a Docker container with security constraints"""
         if start_time is None:
@@ -223,6 +223,8 @@ class DockerSandbox:
             }
 
             # Run container
+            if not self.client:
+                raise RuntimeError("Docker client not available")
             container = self.client.containers.run(**container_config, detach=True)
 
             # Wait for completion with timeout
@@ -311,6 +313,8 @@ class DockerSandbox:
                     test_result.passed_tests = report_data.get("summary", {}).get("passed", 0)
 
                     # Parse failed tests
+                    if test_result.failed_tests is None:
+                        test_result.failed_tests = []
                     for test in report_data.get("tests", []):
                         if test.get("outcome") == "failed":
                             test_result.failed_tests.append({

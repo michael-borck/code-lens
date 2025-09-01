@@ -2,6 +2,8 @@
 Database configuration and connection management
 """
 
+from typing import AsyncGenerator
+
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
@@ -31,7 +33,7 @@ class Base(DeclarativeBase):
     pass
 
 
-async def get_db() -> AsyncSession:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Dependency to get database session"""
     async with AsyncSessionLocal() as session:
         try:
@@ -44,7 +46,7 @@ async def get_db() -> AsyncSession:
             await session.close()
 
 
-async def init_db():
+async def init_db() -> None:
     """Initialize database tables"""
     async with engine.begin() as conn:
         # Import all models to ensure they're registered

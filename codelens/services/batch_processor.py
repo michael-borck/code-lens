@@ -32,9 +32,9 @@ class BatchProcessingConfig:
     default_language: str = "python"
 
     # Student ID extraction patterns
-    student_id_patterns: list[str] = None
+    student_id_patterns: list[str] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.student_id_patterns is None:
             self.student_id_patterns = [
                 r'(\d{6,12})',  # 6-12 digit student IDs
@@ -55,7 +55,7 @@ class BatchFile:
     file_size: int = 0
     file_hash: str = ""
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.file_size = len(self.content.encode('utf-8'))
         self.file_hash = calculate_file_hash(self.content)
 
@@ -346,7 +346,7 @@ class BatchProcessor:
             if student_id:
                 break
 
-            for pattern in self.config.student_id_patterns:
+            for pattern in self.config.student_id_patterns or []:
                 match = re.search(pattern, part.lower())
                 if match:
                     student_id = match.group(1)
@@ -375,11 +375,11 @@ class BatchProcessor:
                 )
                 for file in files
             ]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
+            gather_results = await asyncio.gather(*tasks, return_exceptions=True)
 
             # Handle any exceptions
-            processed_results = []
-            for i, result in enumerate(results):
+            processed_results: list[AnalysisResponse] = []
+            for i, result in enumerate(gather_results):
                 if isinstance(result, Exception):
                     logger.error("File processing failed",
                                file=str(files[i].path),
@@ -389,16 +389,18 @@ class BatchProcessor:
                         success=False,
                         submission_id=generate_submission_id(),
                         error_message=f"Processing failed: {str(result)}",
-                        processing_time=0.0
+                        processing_time=0.0,
+                        total_score=0.0,
+                        max_score=100.0
                     )
                     processed_results.append(error_response)
-                else:
+                elif isinstance(result, AnalysisResponse):
                     processed_results.append(result)
 
             return processed_results
         else:
             # Process files sequentially
-            results = []
+            results: list[AnalysisResponse] = []
             for file in files:
                 result = await self._process_single_file(file, assignment_id, rubric_id)
                 results.append(result)
@@ -423,19 +425,6 @@ class BatchProcessor:
     ) -> AnalysisResponse:
         """Process a single file through the analysis pipeline"""
         try:
-            # Create analysis request
-            AnalysisRequest(
-                code=file.content,
-                language=file.language,
-                assignment_id=assignment_id,
-                rubric_id=rubric_id,
-                student_id=file.student_id,
-                student_name=file.student_name,
-                check_similarity=True,
-                run_tests=False,  # Don't run tests in batch mode by default
-                execute_code=False
-            )
-
             # Run analysis
             start_time = datetime.utcnow()
 
@@ -462,7 +451,9 @@ class BatchProcessor:
                 metrics=convert_metrics(analysis_result.metrics),
                 analysis_version=analysis_result.analyzer_version,
                 processing_time=processing_time,
-                tools_used={"analyzer": analysis_result.analyzer_version}
+                tools_used={"analyzer": analysis_result.analyzer_version},
+                total_score=0.0,
+                max_score=100.0
             )
 
             logger.info("Processed file",
@@ -480,7 +471,9 @@ class BatchProcessor:
                 success=False,
                 submission_id=generate_submission_id(),
                 error_message=f"Processing failed: {str(e)}",
-                processing_time=0.0
+                processing_time=0.0,
+                total_score=0.0,
+                max_score=100.0
             )
 
     def _calculate_score_distribution(self, scores: list[float]) -> dict[str, int]:

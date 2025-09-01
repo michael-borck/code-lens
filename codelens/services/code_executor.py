@@ -210,6 +210,9 @@ class CodeExecutorService:
 
     async def _run_python_tests(self, request: CodeExecutionRequest) -> TestResult:
         """Run Python tests against student code"""
+        if not self.sandbox:
+            return TestResult(test_output="Sandbox not available")
+
         if request.test_code:
             # Use provided test code
             return await self.sandbox.run_python_tests(
@@ -300,7 +303,7 @@ class CodeExecutorService:
 
     def is_available(self) -> bool:
         """Check if code execution is available"""
-        return self.sandbox and self.sandbox.is_available()
+        return bool(self.sandbox and self.sandbox.is_available())
 
 
 # Global code executor instance

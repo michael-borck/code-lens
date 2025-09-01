@@ -2,6 +2,8 @@
 FastAPI application entry point
 """
 
+from typing import Any
+
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -71,19 +73,19 @@ def create_app() -> FastAPI:
     )
 
     @app.on_event("startup")
-    async def startup_event():
+    async def startup_event() -> None:
         """Initialize application on startup"""
         logger.info("Starting CodeLens application")
         await init_db()
         logger.info("Database initialized")
 
     @app.on_event("shutdown")
-    async def shutdown_event():
+    async def shutdown_event() -> None:
         """Cleanup on shutdown"""
         logger.info("Shutting down CodeLens application")
 
     @app.get("/health")
-    async def health_check():
+    async def health_check() -> dict[str, Any]:
         """Health check endpoint"""
         return {
             "status": "healthy",

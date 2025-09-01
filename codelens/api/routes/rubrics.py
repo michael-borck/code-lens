@@ -25,7 +25,7 @@ router = APIRouter()
 async def create_rubric(
     rubric: RubricCreate,
     db: AsyncSession = Depends(get_db)
-):
+) -> RubricResponse:
     """Create a new grading rubric"""
     try:
         # Create rubric instance
@@ -62,7 +62,7 @@ async def list_rubrics(
     limit: int = 50,
     offset: int = 0,
     db: AsyncSession = Depends(get_db)
-):
+) -> list[RubricResponse]:
     """List all rubrics with optional filtering"""
     try:
         query = select(Rubric)
@@ -91,7 +91,7 @@ async def list_rubrics(
 async def get_rubric(
     rubric_id: int,
     db: AsyncSession = Depends(get_db)
-):
+) -> RubricResponse:
     """Get a specific rubric by ID"""
     try:
         result = await db.execute(select(Rubric).where(Rubric.id == rubric_id))
@@ -122,7 +122,7 @@ async def update_rubric(
     rubric_id: int,
     rubric_update: RubricCreate,
     db: AsyncSession = Depends(get_db)
-):
+) -> RubricResponse:
     """Update an existing rubric"""
     try:
         result = await db.execute(select(Rubric).where(Rubric.id == rubric_id))
@@ -141,7 +141,7 @@ async def update_rubric(
         rubric.criteria = rubric_update.criteria
         rubric.weights = rubric_update.weights
         rubric.total_points = rubric_update.total_points
-        rubric.analysis_config = rubric_update.analysis_config
+        rubric.analysis_config = rubric_update.analysis_config or {}
 
         await db.commit()
         await db.refresh(rubric)
@@ -165,7 +165,7 @@ async def update_rubric(
 async def delete_rubric(
     rubric_id: int,
     db: AsyncSession = Depends(get_db)
-):
+) -> None:
     """Delete a rubric"""
     try:
         result = await db.execute(select(Rubric).where(Rubric.id == rubric_id))
@@ -209,7 +209,7 @@ async def delete_rubric(
 async def get_rubrics_by_language(
     language: str,
     db: AsyncSession = Depends(get_db)
-):
+) -> list[RubricResponse]:
     """Get all rubrics for a specific programming language"""
     try:
         result = await db.execute(
@@ -234,7 +234,7 @@ async def get_rubrics_by_language(
 async def create_assignment(
     assignment: AssignmentCreate,
     db: AsyncSession = Depends(get_db)
-):
+) -> AssignmentResponse:
     """Create a new assignment"""
     try:
         # Verify rubric exists
@@ -292,7 +292,7 @@ async def list_assignments(
     limit: int = 50,
     offset: int = 0,
     db: AsyncSession = Depends(get_db)
-):
+) -> list[AssignmentResponse]:
     """List assignments with optional filtering"""
     try:
         query = select(Assignment)
@@ -323,7 +323,7 @@ async def list_assignments(
 async def get_assignment(
     assignment_id: int,
     db: AsyncSession = Depends(get_db)
-):
+) -> AssignmentResponse:
     """Get a specific assignment by ID"""
     try:
         result = await db.execute(select(Assignment).where(Assignment.id == assignment_id))

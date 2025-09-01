@@ -20,7 +20,7 @@ logger = structlog.get_logger()
 class SimilarityService:
     """Service for managing similarity analysis and plagiarism detection"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.detector = similarity_detector
         self.enabled = settings.similarity.enabled
         self.threshold = settings.similarity.threshold

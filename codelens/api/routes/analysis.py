@@ -4,6 +4,7 @@ API endpoints for code analysis
 
 import uuid
 from datetime import datetime
+from typing import Any
 
 import structlog
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
@@ -226,11 +227,11 @@ async def analyze_python_code(
                 f"Fix {i.category} issue: {i.message}"
                 for i in analysis_result.issues[:3]
             ],
-            resources=[
-                "https://pep8.org/" if any(i.category == "style" for i in analysis_result.issues) else None
-            ]
+            resources=[]
         )
-        feedback.resources = [r for r in feedback.resources if r]  # Remove None values
+        # Add style resource if needed
+        if any(i.category == "style" for i in analysis_result.issues):
+            feedback.resources.append("https://pep8.org/")
 
         # Create response
         response = AnalysisResponse(

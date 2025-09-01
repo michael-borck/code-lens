@@ -17,7 +17,7 @@ logger = structlog.get_logger()
 class AnalyzerManager:
     """Manages and orchestrates different code analyzers"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.analyzers: dict[str, BaseAnalyzer] = {}
         self._initialize_analyzers()
 
@@ -132,6 +132,12 @@ class AnalyzerManager:
             code = file_info.get("code", "")
             file_path = file_info.get("path", "unknown")
 
+            # Ensure we have strings, not dict/Any
+            if not isinstance(code, str):
+                code = str(code)
+            if not isinstance(file_path, str):
+                file_path = str(file_path)
+
             result = await self.analyze_code(
                 code=code,
                 language=language,
@@ -163,7 +169,9 @@ class AnalyzerManager:
         """Get information about all available analyzers"""
         info = {}
         for language in self.analyzers:
-            info[language] = self.get_analyzer_info(language)
+            analyzer_info = self.get_analyzer_info(language)
+            if analyzer_info:
+                info[language] = analyzer_info
         return info
 
     def update_analyzer_config(self, language: str, config: dict[str, Any]) -> bool:

@@ -7,6 +7,7 @@ import asyncio
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 import structlog
 
@@ -17,7 +18,7 @@ from codelens.utils import calculate_grade_letter, format_file_size
 logger = structlog.get_logger()
 
 
-async def process_directory_command(args) -> int:
+async def process_directory_command(args: Any) -> int:
     """Process a directory of code submissions"""
     try:
         print(f"CodeLens Batch Processor v{settings.version}")
@@ -136,7 +137,7 @@ async def process_directory_command(args) -> int:
         return 1
 
 
-async def analyze_single_file(args) -> int:
+async def analyze_single_file(args: Any) -> int:
     """Analyze a single code file"""
     try:
         file_path = Path(args.file)
