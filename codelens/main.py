@@ -41,9 +41,9 @@ def create_app() -> FastAPI:
         description="Automated Code Analysis & Grading Assistant for Educators",
         version=settings.version,
         debug=settings.debug,
-        openapi_url=f"{settings.api_prefix}/openapi.json" if settings.debug else None,
-        docs_url=f"{settings.api_prefix}/docs" if settings.debug else None,
-        redoc_url=f"{settings.api_prefix}/redoc" if settings.debug else None,
+        openapi_url="/openapi.json" if settings.docs_enabled else None,
+        docs_url="/docs" if settings.docs_enabled else None,
+        redoc_url="/redoc" if settings.docs_enabled else None,
     )
 
     # CORS middleware

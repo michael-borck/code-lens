@@ -67,6 +67,7 @@ class Settings(BaseSettings):
     api_prefix: str = "/api/v1"
     host: str = "localhost"
     port: int = 8000
+    docs_enabled: bool = True  # Always enable Swagger docs for educational tool
 
     # Security
     secret_key: str = Field(default="your-secret-key-change-in-production")
