@@ -17,8 +17,8 @@ RUN apt-get update && apt-get install -y \
 # Install uv for fast Python package management
 RUN pip install uv
 
-# Create app user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+# Create app user with home directory
+RUN groupadd -r appuser && useradd -r -g appuser -m appuser
 
 # Set working directory
 WORKDIR /app
@@ -35,9 +35,10 @@ RUN uv sync --frozen
 # Copy remaining application files
 COPY . .
 
-# Create necessary directories
+# Create necessary directories and fix permissions
 RUN mkdir -p logs uploads temp && \
-    chown -R appuser:appuser /app
+    chown -R appuser:appuser /app && \
+    chown -R appuser:appuser /home/appuser
 
 # Switch to non-root user
 USER appuser
