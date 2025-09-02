@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  codelens-app:
+    build: .
+    container_name: codelens-app
+    ports:
+      - "8000:8000"
+    environment:
+      - CODELENS_ENV=production
+      - CODELENS_LOG_LEVEL=info
+      - CODELENS_DATABASE__URL=sqlite+aiosqlite:///data/codelens.db
+      - CODELENS_DOCKER_ENABLED=true
+    volumes:
+      - codelens-data:/app/data
+      - codelens-logs:/app/logs
+      - codelens-uploads:/app/uploads
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    depends_on:
+      - codelens-db
+    networks:
+      - codelens-network
+
+  codelens-db:
+    image: postgres:15-alpine
+    container_name: codelens-db
+    environment:
+      POSTGRES_DB: codelens
+      POSTGRES_USER: codelens
+      POSTGRES_PASSWORD: codelens_secure_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - codelens-network
+
+  codelens-redis:
+    image: redis:7-alpine
+    container_name: codelens-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - codelens-network
+
+volumes:
+  codelens-data:
+  codelens-logs:
+  codelens-uploads:
+  postgres-data:
+  redis-data:
+
+networks:
+  codelens-network:
+    driver: bridge

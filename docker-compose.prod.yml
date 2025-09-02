@@ -1,0 +1,91 @@
+# Production Docker Compose with PostgreSQL, Redis, and Nginx
+version: '3.8'
+
+services:
+  codelens-app:
+    build: .
+    container_name: codelens-app-prod
+    environment:
+      - CODELENS_ENV=production
+      - CODELENS_LOG_LEVEL=warning
+      - CODELENS_DATABASE__URL=postgresql+asyncpg://codelens:${POSTGRES_PASSWORD}@codelens-db:5432/codelens
+      - CODELENS_REDIS_URL=redis://codelens-redis:6379/0
+      - CODELENS_SECRET_KEY=${SECRET_KEY}
+      - CODELENS_DOCKER_ENABLED=true
+      - CODELENS_SIMILARITY__ENABLED=true
+    volumes:
+      - codelens-data:/app/data
+      - codelens-logs:/app/logs
+      - codelens-uploads:/app/uploads
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    depends_on:
+      - codelens-db
+      - codelens-redis
+    networks:
+      - codelens-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+  codelens-db:
+    image: postgres:15-alpine
+    container_name: codelens-db-prod
+    environment:
+      POSTGRES_DB: codelens
+      POSTGRES_USER: codelens
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backups:/backups
+    restart: unless-stopped
+    networks:
+      - codelens-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  codelens-redis:
+    image: redis:7-alpine
+    container_name: codelens-redis-prod
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - codelens-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: codelens-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - codelens-logs:/var/log/nginx
+    depends_on:
+      - codelens-app
+    restart: unless-stopped
+    networks:
+      - codelens-network
+
+volumes:
+  codelens-data:
+  codelens-logs:
+  codelens-uploads:
+  postgres-data:
+  redis-data:
+
+networks:
+  codelens-network:
+    driver: bridge
