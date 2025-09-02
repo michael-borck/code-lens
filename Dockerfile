@@ -26,10 +26,13 @@ WORKDIR /app
 # Copy dependency files and README (needed for package build)
 COPY pyproject.toml uv.lock README.md ./
 
+# Copy source code (needed for editable install)
+COPY codelens/ ./codelens/
+
 # Install dependencies with uv
 RUN uv sync --frozen
 
-# Copy application code
+# Copy remaining application files
 COPY . .
 
 # Create necessary directories
