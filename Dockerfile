@@ -23,8 +23,8 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 # Set working directory
 WORKDIR /app
 
-# Copy dependency files
-COPY pyproject.toml uv.lock ./
+# Copy dependency files and README (needed for package build)
+COPY pyproject.toml uv.lock README.md ./
 
 # Install dependencies with uv
 RUN uv sync --frozen
