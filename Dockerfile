@@ -17,8 +17,10 @@ RUN apt-get update && apt-get install -y \
 # Install uv for fast Python package management
 RUN pip install uv
 
-# Create app user with home directory
-RUN groupadd -r appuser && useradd -r -g appuser -m appuser
+# Create app user with home directory and docker group access
+RUN groupadd -r appuser && useradd -r -g appuser -m appuser \
+    && groupadd -f docker \
+    && usermod -aG docker appuser
 
 # Set working directory
 WORKDIR /app

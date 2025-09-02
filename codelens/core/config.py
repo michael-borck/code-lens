@@ -33,7 +33,7 @@ class SimilarityConfig(BaseModel):
 
     enabled: bool = True
     threshold: float = 0.8  # Similarity threshold for flagging
-    methods: list[str] = ["ast_similarity", "token_similarity"]
+    methods: list[str] = ["ast_structural", "token_based"]
 
     # AI-generated baseline comparison
     use_ai_baselines: bool = True
