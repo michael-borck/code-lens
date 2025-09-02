@@ -48,7 +48,7 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
-**Access**: http://localhost:8000
+**Access**: http://localhost:8003
 
 ### Production Setup
 ```bash

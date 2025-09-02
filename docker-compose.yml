@@ -5,7 +5,7 @@ services:
     build: .
     container_name: codelens-app
     ports:
-      - "8000:8000"
+      - "8003:8000"
     environment:
       - CODELENS_ENV=production
       - CODELENS_LOG_LEVEL=info

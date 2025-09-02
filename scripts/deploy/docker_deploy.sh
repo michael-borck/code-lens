@@ -87,9 +87,9 @@ if [ "$ENVIRONMENT" = "prod" ]; then
     fi
 else
     # Development direct access
-    if curl -f http://localhost:8000/health &> /dev/null; then
+    if curl -f http://localhost:8003/health &> /dev/null; then
         echo "✅ CodeLens is running successfully!"
-        echo "🌐 Access CodeLens at: http://localhost:8000"
+        echo "🌐 Access CodeLens at: http://localhost:8003"
     else
         echo "❌ Health check failed!"
         $DOCKER_COMPOSE -f $COMPOSE_FILE logs codelens-app

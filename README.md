@@ -91,7 +91,7 @@ uvicorn codelens.main:app --reload
 uvicorn codelens.main:app --host 0.0.0.0 --port 8000
 ```
 
-The API will be available at `http://localhost:8000` with documentation at `/docs`.
+The API will be available at `http://localhost:8003` with documentation at `/docs`.
 
 ### CLI Usage
 
@@ -114,7 +114,7 @@ python -m codelens batch /submissions --output results.json --rubric-id 1
 
 ### Analyze Python Code
 ```bash
-curl -X POST "http://localhost:8000/api/v1/analyze/python" \
+curl -X POST "http://localhost:8003/api/v1/analyze/python" \
   -H "Content-Type: application/json" \
   -d '{
     "code": "def hello():\n    print(\"Hello, World!\")",
@@ -127,7 +127,7 @@ curl -X POST "http://localhost:8000/api/v1/analyze/python" \
 
 ### Batch Analysis
 ```bash
-curl -X POST "http://localhost:8000/api/v1/analyze/batch" \
+curl -X POST "http://localhost:8003/api/v1/analyze/batch" \
   -H "Content-Type: application/json" \
   -d '{
     "files": [
@@ -141,7 +141,7 @@ curl -X POST "http://localhost:8000/api/v1/analyze/batch" \
 
 ### Create Rubric
 ```bash
-curl -X POST "http://localhost:8000/api/v1/rubrics/" \
+curl -X POST "http://localhost:8003/api/v1/rubrics/" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Python Assignment 1",

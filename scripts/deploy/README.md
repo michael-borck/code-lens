@@ -157,7 +157,7 @@ The installation script installs:
 docker-compose ps
 
 # Test health endpoint
-curl http://localhost:8000/health  # Dev
+curl http://localhost:8003/health  # Dev
 curl http://localhost/health       # Prod
 
 # View logs
