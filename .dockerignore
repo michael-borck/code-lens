@@ -53,8 +53,9 @@ backups/
 Dockerfile*
 docker-compose*.yml
 
-# Documentation
-*.md
+# Documentation (keep README.md for build)
+DEPLOYMENT.md
+CODE-LENS.md
 docs/
 
 # Development
