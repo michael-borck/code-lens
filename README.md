@@ -1,5 +1,9 @@
 # CodeLens
 
+<!-- BADGES:START -->
+[![edtech](https://img.shields.io/badge/-edtech-4caf50?style=flat-square)](https://github.com/topics/edtech) [![automated-grading](https://img.shields.io/badge/-automated--grading-blue?style=flat-square)](https://github.com/topics/automated-grading) [![code-analysis](https://img.shields.io/badge/-code--analysis-blue?style=flat-square)](https://github.com/topics/code-analysis) [![docker](https://img.shields.io/badge/-docker-2496ed?style=flat-square)](https://github.com/topics/docker) [![education](https://img.shields.io/badge/-education-blue?style=flat-square)](https://github.com/topics/education) [![fastapi](https://img.shields.io/badge/-fastapi-009688?style=flat-square)](https://github.com/topics/fastapi) [![microservice](https://img.shields.io/badge/-microservice-blue?style=flat-square)](https://github.com/topics/microservice) [![plagiarism-detection](https://img.shields.io/badge/-plagiarism--detection-blue?style=flat-square)](https://github.com/topics/plagiarism-detection) [![python](https://img.shields.io/badge/-python-3776ab?style=flat-square)](https://github.com/topics/python) [![static-analysis](https://img.shields.io/badge/-static--analysis-blue?style=flat-square)](https://github.com/topics/static-analysis)
+<!-- BADGES:END -->
+
 **Automated Code Analysis & Grading Assistant for Educators**
 
 CodeLens is a comprehensive microservice designed to help educators analyze, validate, and grade student code submissions across multiple programming languages. It provides automated analysis, plagiarism detection, sandboxed code execution, and detailed feedback generation.
