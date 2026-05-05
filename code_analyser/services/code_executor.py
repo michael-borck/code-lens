@@ -7,7 +7,7 @@ from typing import Any
 
 import structlog
 
-from codelens.core.config import settings
+from code_analyser.core.config import settings
 
 from .sandbox import ExecutionResult, TestResult, sandbox
 

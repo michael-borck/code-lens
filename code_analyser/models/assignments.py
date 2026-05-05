@@ -9,7 +9,7 @@ from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Tex
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
-from codelens.db.database import Base
+from code_analyser.db.database import Base
 
 if TYPE_CHECKING:
     from .reports import AnalysisReport

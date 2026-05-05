@@ -8,7 +8,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field, validator
 
-from codelens.analyzers.base import Severity
+from code_analyser.analyzers.base import Severity
 
 
 class AnalysisLanguage(str, Enum):

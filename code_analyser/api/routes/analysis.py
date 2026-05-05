@@ -10,8 +10,8 @@ import structlog
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from codelens.analyzers import AnalysisResult, analyzer_manager
-from codelens.api.schemas import (
+from code_analyser.analyzers import AnalysisResult, analyzer_manager
+from code_analyser.api.schemas import (
     AnalysisIssueSchema,
     AnalysisRequest,
     AnalysisResponse,
@@ -24,10 +24,10 @@ from codelens.api.schemas import (
     SimilarityResultSchema,
     TestResultSchema,
 )
-from codelens.core.config import settings
-from codelens.db.database import get_db
-from codelens.models import AnalysisReport
-from codelens.services import CodeExecutionRequest, code_executor
+from code_analyser.core.config import settings
+from code_analyser.db.database import get_db
+from code_analyser.models import AnalysisReport
+from code_analyser.services import CodeExecutionRequest, code_executor
 
 logger = structlog.get_logger()
 router = APIRouter()

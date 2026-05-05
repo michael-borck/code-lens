@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "codelens"
+name = "code-analyser"
 version = "0.1.0"
 description = "Automated Code Analysis & Grading Assistant for Educators"
 readme = "README.md"
@@ -84,6 +84,12 @@ no_implicit_optional = true
 warn_return_any = true
 warn_unused_ignores = true
 show_error_codes = true
+
+[project.scripts]
+code-analyser = "code_analyser.entrypoint:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["code_analyser"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

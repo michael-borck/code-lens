@@ -6,7 +6,7 @@ from typing import Any
 
 import structlog
 
-from codelens.core.config import settings
+from code_analyser.core.config import settings
 
 from .base import AnalysisIssue, AnalysisResult, BaseAnalyzer, CodeMetrics, Severity
 from .python_analyzer import PythonAnalyzer

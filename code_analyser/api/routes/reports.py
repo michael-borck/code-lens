@@ -12,8 +12,8 @@ from pydantic import BaseModel
 from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from codelens.db.database import get_db
-from codelens.models import AnalysisReport, Assignment, SimilarityMatch
+from code_analyser.db.database import get_db
+from code_analyser.models import AnalysisReport, Assignment, SimilarityMatch
 
 logger = structlog.get_logger()
 router = APIRouter()

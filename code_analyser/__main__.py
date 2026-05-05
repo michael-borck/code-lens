@@ -5,7 +5,7 @@ Entry point for running CodeLens as a module
 import asyncio
 import sys
 
-from codelens.cli import main
+from code_analyser.cli import main
 
 if __name__ == "__main__":
     try:

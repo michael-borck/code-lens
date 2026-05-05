@@ -14,7 +14,7 @@ import docker  # type: ignore[import-untyped]
 import structlog
 from docker.errors import ContainerError, DockerException, ImageNotFound  # type: ignore[import-untyped]
 
-from codelens.core.config import settings
+from code_analyser.core.config import settings
 
 logger = structlog.get_logger()
 

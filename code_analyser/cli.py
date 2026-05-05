@@ -11,9 +11,9 @@ from typing import Any
 
 import structlog
 
-from codelens.core.config import settings
-from codelens.services.batch_processor import BatchProcessingConfig, batch_processor
-from codelens.utils import calculate_grade_letter, format_file_size
+from code_analyser.core.config import settings
+from code_analyser.services.batch_processor import BatchProcessingConfig, batch_processor
+from code_analyser.utils import calculate_grade_letter, format_file_size
 
 logger = structlog.get_logger()
 
@@ -210,16 +210,16 @@ def create_parser() -> argparse.ArgumentParser:
         epilog="""
 Examples:
   # Process a directory of Python submissions
-  python -m codelens.cli batch /path/to/submissions --language python
+  python -m code_analyser.cli batch /path/to/submissions --language python
 
   # Process with specific rubric and assignment
-  python -m codelens.cli batch /path/to/submissions --rubric-id 1 --assignment-id 5
+  python -m code_analyser.cli batch /path/to/submissions --rubric-id 1 --assignment-id 5
 
   # Analyze a single file
-  python -m codelens.cli analyze submission.py --student-id cs123456
+  python -m code_analyser.cli analyze submission.py --student-id cs123456
 
   # Generate detailed report with output file
-  python -m codelens.cli batch /submissions --detailed --output results.json
+  python -m code_analyser.cli batch /submissions --detailed --output results.json
         """
     )
 

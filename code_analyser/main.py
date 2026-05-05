@@ -8,9 +8,9 @@ import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from codelens.api.routes import analysis, reports, rubrics
-from codelens.core.config import settings
-from codelens.db.database import init_db
+from code_analyser.api.routes import analysis, reports, rubrics
+from code_analyser.core.config import settings
+from code_analyser.db.database import init_db
 
 # Configure structured logging
 structlog.configure(
@@ -103,7 +103,7 @@ app = create_app()
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
-        "codelens.main:app",
+        "code_analyser.main:app",
         host=settings.host,
         port=settings.port,
         reload=settings.debug,

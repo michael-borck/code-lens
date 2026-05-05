@@ -10,9 +10,9 @@ from pathlib import Path
 
 import structlog
 
-from codelens.analyzers import analyzer_manager
-from codelens.api.schemas import AnalysisRequest, AnalysisResponse
-from codelens.utils import (
+from code_analyser.analyzers import analyzer_manager
+from code_analyser.api.schemas import AnalysisRequest, AnalysisResponse
+from code_analyser.utils import (
     calculate_file_hash,
     detect_language_from_extension,
     generate_submission_id,
@@ -438,7 +438,7 @@ class BatchProcessor:
             processing_time = (datetime.utcnow() - start_time).total_seconds()
 
             # Convert to response format (simplified)
-            from codelens.api.routes.analysis import (
+            from code_analyser.api.routes.analysis import (
                 convert_analysis_issues,
                 convert_metrics,
             )

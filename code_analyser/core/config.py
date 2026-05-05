@@ -43,7 +43,7 @@ class SimilarityConfig(BaseModel):
 class DatabaseConfig(BaseModel):
     """Database configuration"""
 
-    url: str = "sqlite+aiosqlite:///./codelens.db"
+    url: str = "sqlite+aiosqlite:///./code_analyser.db"
     echo: bool = False  # SQL logging
     pool_size: int = 5
     max_overflow: int = 10

@@ -9,10 +9,10 @@ import structlog
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from codelens.analyzers import SimilarityMethod, SimilarityResult, similarity_detector
-from codelens.core.config import settings
-from codelens.models import AnalysisReport
-from codelens.models import SimilarityMatch as SimilarityMatchModel
+from code_analyser.analyzers import SimilarityMethod, SimilarityResult, similarity_detector
+from code_analyser.core.config import settings
+from code_analyser.models import AnalysisReport
+from code_analyser.models import SimilarityMatch as SimilarityMatchModel
 
 logger = structlog.get_logger()
 
@@ -247,7 +247,7 @@ class SimilarityService:
 
         For now, we simulate based on simple heuristics
         """
-        from codelens.utils import calculate_file_hash
+        from code_analyser.utils import calculate_file_hash
 
         current_hash = calculate_file_hash(code)
 
@@ -261,7 +261,7 @@ class SimilarityService:
             hash_similarity = len(set(current_hash).intersection(set(existing_hash))) / len(set(current_hash + existing_hash))
             similarity_score = hash_similarity * 0.3  # Scale down since hash similarity is not meaningful
 
-        from codelens.analyzers.similarity_analyzer import (
+        from code_analyser.analyzers.similarity_analyzer import (
             SimilarityMatch,
             SimilarityResult,
         )

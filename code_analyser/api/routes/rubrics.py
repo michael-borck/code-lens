@@ -8,14 +8,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from codelens.api.schemas import (
+from code_analyser.api.schemas import (
     AssignmentCreate,
     AssignmentResponse,
     RubricCreate,
     RubricResponse,
 )
-from codelens.db.database import get_db
-from codelens.models import Assignment, Rubric
+from code_analyser.db.database import get_db
+from code_analyser.models import Assignment, Rubric
 
 logger = structlog.get_logger()
 router = APIRouter()

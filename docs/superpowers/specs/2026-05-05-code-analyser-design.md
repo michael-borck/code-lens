@@ -21,8 +21,8 @@ Rewrite code-analyser to align with the analyser family pattern: argparse CLI (`
 | Python | `ast` (stdlib) + `ruff` (subprocess) |
 | HTML | `html5lib` |
 | CSS | `tinycss2` |
-| JavaScript | `esprima` (pure-Python port) |
-| TypeScript | `esprima` + type annotation heuristics |
+| JavaScript / JSX | `esprima` (pure-Python port, JSX mode for `.jsx`) |
+| TypeScript / TSX | `esprima` + type annotation heuristics (JSX mode for `.tsx`) |
 | SQL | `sqlparse` |
 
 ### Input
@@ -144,6 +144,8 @@ All JavaScript signals, plus:
 - `unsafe_patterns: list[str]` (UPDATE without WHERE, DELETE without WHERE, SELECT *)
 
 ### Cross-file (`pipeline.py`)
+
+Always present — for single-file input, `import_graph` and `unrecognised_files` are empty.
 
 - `file_count: int`
 - `languages_detected: list[str]`
