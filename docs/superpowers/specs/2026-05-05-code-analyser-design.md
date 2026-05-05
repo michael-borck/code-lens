@@ -118,6 +118,13 @@ Validation: calls the **Nu HTML Checker API** (`validator.w3.org/nu/`) with the 
 - `inline_script_count: int`, `inline_style_count: int`
 - `comment_count: int`
 
+**External resources:**
+- `external_scripts: list[{src, is_cdn, library}]` — all `<script src="...">` tags. `is_cdn: true` if src matches known CDN hostnames. `library` is the detected library name if recognisable (e.g. `"jquery"`, `"bootstrap"`, `"react"`, `"vue"`, `"tailwind"`, `"font-awesome"`) or `null`.
+- `external_stylesheets: list[{href, is_cdn, library}]` — all `<link rel="stylesheet" href="...">` tags, same CDN/library detection.
+- `cdn_count: int` — total CDN-hosted resources (scripts + stylesheets combined).
+
+CDN hostnames detected: `cdnjs.cloudflare.com`, `unpkg.com`, `cdn.jsdelivr.net`, `ajax.googleapis.com`, `cdn.tailwindcss.com`, `stackpath.bootstrapcdn.com`, `maxcdn.bootstrapcdn.com`, `code.jquery.com`, `cdn.bootcss.com`. New patterns can be added without changing the schema.
+
 **Static accessibility signals** (file-based, no browser needed):
 - `img_alt_coverage: float` (0–1, % of `<img>` with non-empty alt)
 - `form_label_coverage: float` (0–1, % of inputs with an associated `<label>`)
@@ -142,6 +149,13 @@ Validation: calls the **W3C CSS Validator API** (`jigsaw.w3.org/css-validator/`)
 - `media_query_count: int`
 - `custom_property_count: int` (CSS variables)
 - `comment_count: int`
+
+**Layout method signals:**
+- `float_count: int` — number of `float: left/right` declarations
+- `flexbox_count: int` — number of `display: flex` / `display: inline-flex` declarations
+- `grid_count: int` — number of `display: grid` / `display: inline-grid` declarations
+- `dominant_layout: str` — `"float"` | `"flexbox"` | `"grid"` | `"mixed"` | `"none"` (whichever has the highest count; `"mixed"` if two or more are within 20% of each other)
+- `float_used_for_layout: bool` — heuristic: float used on non-image elements (suggests old-school layout pattern rather than just wrapping text around an image)
 
 ### JavaScript (`core/javascript_.py`)
 
