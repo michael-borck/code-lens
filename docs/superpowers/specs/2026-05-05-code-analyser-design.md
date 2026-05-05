@@ -41,6 +41,7 @@ Rewrite code-analyser to align with the analyser family pattern: argparse CLI (`
 - WordPress-specific signals — wordpress-analyser (separate tool)
 - NLP engine — future shared library; comment text analysis lives in `[llm]` for now
 - folder-analyser, git-analyser — separate tools
+- Dynamic accessibility (colour contrast, focus order, screen reader behaviour) — requires a running browser and a URL; use Lighthouse or axe-core at the consumer layer
 
 ## Architecture
 
@@ -100,17 +101,34 @@ Each stage is wrapped in try/except. A parse failure sets `syntax_valid: false` 
 
 ### HTML (`core/html_.py`)
 
+Validation: calls the **Nu HTML Checker API** (`validator.w3.org/nu/`) with the raw HTML bytes, parses the JSON response. Falls back to `html5lib` local parsing if the API is unreachable (timeout or offline). The `validator` field in output indicates which was used: `"w3c"` or `"local"`.
+
 - `syntax_valid: bool`, `parse_error_count: int`
+- `validator: str` — `"w3c"` | `"local"` (which validation source was used)
+- `w3c_errors: list[{type, line, message}]` — from Nu HTML Checker (empty if local fallback)
 - `has_doctype: bool`
 - `semantic_elements: list[str]` (header, nav, main, footer, article, section — present ones)
-- `img_alt_coverage: float` (0–1, % of `<img>` with non-empty alt)
-- `form_label_coverage: float` (0–1, % of inputs with associated label)
 - `inline_script_count: int`, `inline_style_count: int`
 - `comment_count: int`
 
+**Static accessibility signals** (file-based, no browser needed):
+- `img_alt_coverage: float` (0–1, % of `<img>` with non-empty alt)
+- `form_label_coverage: float` (0–1, % of inputs with an associated `<label>`)
+- `has_lang_attr: bool` (`<html lang="...">` present)
+- `has_title: bool` (`<title>` element present and non-empty)
+- `heading_hierarchy_valid: bool` (no skipped levels, e.g. h1→h3; no multiple h1s)
+- `aria_attribute_count: int` (total ARIA attributes used)
+- `ambiguous_link_count: int` (links whose text is "click here", "here", "read more", etc.)
+
+**Out of scope (dynamic, needs browser + URL):** colour contrast ratios, focus order, screen reader compatibility, interactive element behaviour — use Lighthouse or axe-core at the consumer layer.
+
 ### CSS (`core/css_.py`)
 
+Validation: calls the **W3C CSS Validator API** (`jigsaw.w3.org/css-validator/`) with the raw CSS. Falls back to `tinycss2` local parsing if the API is unreachable. The `validator` field indicates which was used.
+
 - `syntax_valid: bool`, `parse_error_count: int`
+- `validator: str` — `"w3c"` | `"local"`
+- `w3c_errors: list[{line, message}]`, `w3c_warnings: list[{line, message}]`
 - `rule_count: int`, `selector_count: int`
 - `important_count: int`
 - `duplicate_selector_count: int`
@@ -246,15 +264,17 @@ Response: {"status": "ok", "uptime": 12.3}
 | Complete stage failure | `metrics: null` for that file, others continue | same |
 | `--llm` without `[llm]` installed | 422 + install hint | non-zero + message |
 | `--llm` without `ANTHROPIC_API_KEY` | 422 + env var hint | non-zero + message |
+| W3C API unreachable / timeout | falls back to local parser, `validator: "local"` in output | same |
 
 ## Dependencies
 
 **Core (always installed):**
 - `pydantic>=2.5.0`, `pydantic-settings>=2.1.0`
 - `fastapi>=0.109.0`, `uvicorn>=0.27.0`, `python-multipart>=0.0.6`
+- `httpx>=0.27.0` (W3C API calls — Nu HTML Checker + CSS Validator)
 - `rich>=13.7.0`
-- `html5lib>=1.1`
-- `tinycss2>=1.2.0`
+- `html5lib>=1.1` (local HTML fallback)
+- `tinycss2>=1.2.0` (local CSS fallback)
 - `esprima>=4.0.0`
 - `sqlparse>=0.4.4`
 - `ruff>=0.4.0` (subprocess — already a standard dev tool)
