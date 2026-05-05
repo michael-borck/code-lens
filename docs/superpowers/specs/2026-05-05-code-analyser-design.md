@@ -19,6 +19,7 @@ Rewrite code-analyser to align with the analyser family pattern: argparse CLI (`
 | Language | Parser / Tool |
 |---|---|
 | Python | `ast` (stdlib) + `ruff` (subprocess) |
+| Jupyter Notebook | stdlib `json` — notebook signals + code cells dispatched to Python analyser |
 | HTML | `html5lib` |
 | CSS | `tinycss2` |
 | JavaScript / JSX | `esprima` (pure-Python port, JSX mode for `.jsx`) |
@@ -55,6 +56,7 @@ code_analyser/
   pipeline.py       # orchestrate: unpack → detect → dispatch → aggregate
   core/
     python_.py      # ast + ruff subprocess
+    notebook_.py    # json parse, notebook signals, dispatches code cells to python_
     html_.py        # html5lib + accessibility heuristics
     css_.py         # tinycss2 + metrics
     javascript_.py  # esprima + metrics
@@ -71,6 +73,7 @@ Input (file or zip)
   └─→ LanguageDetector → language per file (extension + shebang sniff)
   └─→ Dispatcher       → routes each file to the right core/ module
         ├─→ PythonAnalyser   → PythonMetrics | None
+        ├─→ NotebookAnalyser → NotebookMetrics | None  (internally calls PythonAnalyser on code cells)
         ├─→ HTMLAnalyser     → HTMLMetrics | None
         ├─→ CSSAnalyser      → CSSMetrics | None
         ├─→ JSAnalyser       → JSMetrics | None
@@ -98,6 +101,23 @@ Each stage is wrapped in try/except. A parse failure sets `syntax_valid: false` 
 - `naming_convention: str` ("snake_case" | "camelCase" | "mixed" | "unknown")
 - `imports: list[str]`
 - `todo_count: int` (TODO / FIXME / HACK / XXX in comments)
+- `print_count: int` (calls to `print()` — mirrors `console_log_count` in JS)
+- `type_annotation_coverage: float` (0–1, % of function parameters + return types with annotations)
+- `has_main_guard: bool` (`if __name__ == "__main__":` present)
+- `bare_except_count: int` (`except:` clauses with no exception type — bad practice)
+- `comprehension_count: int` (list + dict + set comprehensions + generator expressions combined)
+
+### Jupyter Notebook (`core/notebook_.py`)
+
+Parsed as JSON (stdlib). Code cells are extracted and dispatched to the Python analyser. Outputs are never modified — `has_outputs` captures whether the notebook was cleaned before submission.
+
+- `code_cell_count: int`
+- `markdown_cell_count: int`
+- `has_outputs: bool` — any cell has non-empty output (notebook not cleaned before submission)
+- `output_cell_count: int` — number of cells with output present
+- `execution_order_valid: bool` — `execution_count` values are strictly monotonically increasing (cells were run top-to-bottom)
+- `magic_command_count: int` — lines starting with `%` or `%%` across all code cells
+- `python_metrics: PythonMetrics | null` — full Python signal set from extracted code cells (all code cells concatenated, then analysed)
 
 ### HTML (`core/html_.py`)
 
@@ -295,6 +315,7 @@ Response: {"status": "ok", "uptime": 12.3}
 ## Dependencies
 
 **Core (always installed):**
+- No new dependency for notebooks — stdlib `json` + existing `ast`/`ruff` for extracted code cells
 - `pydantic>=2.5.0`, `pydantic-settings>=2.1.0`
 - `fastapi>=0.109.0`, `uvicorn>=0.27.0`, `python-multipart>=0.0.6`
 - `httpx>=0.27.0` (W3C API calls — Nu HTML Checker + CSS Validator)
