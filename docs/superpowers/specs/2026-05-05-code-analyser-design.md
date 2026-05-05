@@ -107,7 +107,14 @@ Validation: calls the **Nu HTML Checker API** (`validator.w3.org/nu/`) with the 
 - `validator: str` — `"w3c"` | `"local"` (which validation source was used)
 - `w3c_errors: list[{type, line, message}]` — from Nu HTML Checker (empty if local fallback)
 - `has_doctype: bool`
-- `semantic_elements: list[str]` (header, nav, main, footer, article, section — present ones)
+
+**HTML5 semantic structure:**
+- `semantic_elements_used: list[str]` — which semantic tags appear (header, nav, main, footer, article, section, aside, figure, figcaption, time, mark, details, summary, address)
+- `semantic_element_count: int` — total count of semantic element instances
+- `div_count: int` — total `<div>` elements
+- `span_count: int` — total `<span>` elements
+- `div_to_semantic_ratio: float` — `div_count / (div_count + semantic_element_count)`, 0–1. High values (>0.8) indicate "div soup". `null` if no divs or semantic elements present.
+
 - `inline_script_count: int`, `inline_style_count: int`
 - `comment_count: int`
 
