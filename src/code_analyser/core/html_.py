@@ -1,6 +1,5 @@
 from __future__ import annotations
 import re
-import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
 
 import html5lib
@@ -28,7 +27,7 @@ _LIBRARY_PATTERNS = {
     "vue": re.compile(r"vue(?:\.min)?\.js", re.I),
     "angular": re.compile(r"angular", re.I),
     "tailwind": re.compile(r"tailwind", re.I),
-    "font-awesome": re.compile(r"font.awesome", re.I),
+    "font-awesome": re.compile(r"font[-.]awesome", re.I),
 }
 
 _JS_FRAMEWORK_PATTERNS = [
@@ -40,6 +39,8 @@ _JS_FRAMEWORK_PATTERNS = [
 
 _AMBIGUOUS_LINK_TEXT = {"click here", "here", "read more", "more", "link", "this"}
 
+_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
+
 
 def _detect_library(url: str) -> str | None:
     for lib, pat in _LIBRARY_PATTERNS.items():
@@ -49,11 +50,8 @@ def _detect_library(url: str) -> str | None:
 
 
 def _is_cdn(url: str) -> bool:
-    try:
-        host = urlparse(url).netloc
-        return host in _CDN_HOSTS
-    except Exception:
-        return False
+    host = urlparse(url).netloc
+    return host in _CDN_HOSTS
 
 
 def _w3c_validate(source: str, timeout: float) -> list[W3CError]:
@@ -76,13 +74,13 @@ def _w3c_validate(source: str, timeout: float) -> list[W3CError]:
     ]
 
 
-def analyse_html(source: str, *, timeout: float = 0.5) -> HTMLMetrics:
+def analyse_html(source: str, *, timeout: float = 5.0) -> HTMLMetrics:
     w3c_errors: list[W3CError] = []
     validator = "local"
     try:
         w3c_errors = _w3c_validate(source, timeout)
         validator = "w3c"
-    except Exception:
+    except (httpx.RequestError, httpx.HTTPStatusError):
         pass
 
     parser = html5lib.HTMLParser(tree=html5lib.treebuilders.getTreeBuilder("etree"))
@@ -96,11 +94,11 @@ def analyse_html(source: str, *, timeout: float = 0.5) -> HTMLMetrics:
     inline_scripts = 0
     inline_styles = 0
     event_handlers = 0
-    comments = 0
-    imgs: list[ET.Element] = []
-    inputs: list[ET.Element] = []
-    labels: list[ET.Element] = []
-    links: list[ET.Element] = []
+    comments = len(_COMMENT_RE.findall(source))
+    imgs = []
+    inputs = []
+    labels = []
+    links = []
     headings: list[int] = []
     aria_attrs = 0
     external_scripts: list[ExternalResource] = []
@@ -169,12 +167,10 @@ def analyse_html(source: str, *, timeout: float = 0.5) -> HTMLMetrics:
             if local_attr == "style":
                 inline_styles += 1
 
-    # Framework fingerprinting via code patterns in the full source
     for pat, name in _JS_FRAMEWORK_PATTERNS:
         if pat.search(source):
             frameworks.add(name)
 
-    # Accessibility signals
     img_alt_coverage = (
         sum(1 for img in imgs if img.get("alt", "").strip()) / len(imgs)
         if imgs else 1.0
