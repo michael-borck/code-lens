@@ -1,6 +1,14 @@
 from __future__ import annotations
-from typing import Union
-from pydantic import BaseModel
+from typing import Annotated, Literal, Union
+from pydantic import BaseModel, Field
+
+__all__ = [
+    "LintViolation", "PythonMetrics", "NotebookMetrics",
+    "W3CError", "W3CCSSError", "ExternalResource",
+    "HTMLMetrics", "CSSMetrics", "JSMetrics", "TSMetrics", "SQLMetrics",
+    "CrossFileSignals", "FileLLMSignals", "TopLevelLLMSignals",
+    "FileMetrics", "FileAnalysis", "CodeAnalysis",
+]
 
 
 class LintViolation(BaseModel):
@@ -11,35 +19,35 @@ class LintViolation(BaseModel):
 
 class PythonMetrics(BaseModel):
     syntax_valid: bool
-    lint_error_count: int
-    lint_warning_count: int
+    lint_error_count: Annotated[int, Field(ge=0)]
+    lint_warning_count: Annotated[int, Field(ge=0)]
     lint_violations: list[LintViolation]
-    cyclomatic_complexity: float
-    max_nesting_depth: int
-    loc: int
-    comment_lines: int
-    blank_lines: int
-    function_count: int
-    class_count: int
-    docstring_coverage: float
-    naming_convention: str  # "snake_case" | "camelCase" | "mixed" | "unknown"
+    cyclomatic_complexity: Annotated[float, Field(ge=0.0)]
+    max_nesting_depth: Annotated[int, Field(ge=0)]
+    loc: Annotated[int, Field(ge=0)]
+    comment_lines: Annotated[int, Field(ge=0)]
+    blank_lines: Annotated[int, Field(ge=0)]
+    function_count: Annotated[int, Field(ge=0)]
+    class_count: Annotated[int, Field(ge=0)]
+    docstring_coverage: Annotated[float, Field(ge=0.0)]
+    naming_convention: Literal["snake_case", "camelCase", "mixed", "unknown"]
     imports: list[str]
-    todo_count: int
-    print_count: int
-    type_annotation_coverage: float
+    todo_count: Annotated[int, Field(ge=0)]
+    print_count: Annotated[int, Field(ge=0)]
+    type_annotation_coverage: Annotated[float, Field(ge=0.0)]
     has_main_guard: bool
-    bare_except_count: int
-    comprehension_count: int
+    bare_except_count: Annotated[int, Field(ge=0)]
+    comprehension_count: Annotated[int, Field(ge=0)]
 
 
 class NotebookMetrics(BaseModel):
-    code_cell_count: int
-    markdown_cell_count: int
+    code_cell_count: Annotated[int, Field(ge=0)]
+    markdown_cell_count: Annotated[int, Field(ge=0)]
     has_outputs: bool
-    output_cell_count: int
+    output_cell_count: Annotated[int, Field(ge=0)]
     execution_order_valid: bool
-    magic_command_count: int
-    python_metrics: PythonMetrics | None
+    magic_command_count: Annotated[int, Field(ge=0)]
+    python_metrics: PythonMetrics | None = None
 
 
 class W3CError(BaseModel):
@@ -61,80 +69,80 @@ class ExternalResource(BaseModel):
 
 class HTMLMetrics(BaseModel):
     syntax_valid: bool
-    parse_error_count: int
-    validator: str  # "w3c" | "local"
+    parse_error_count: Annotated[int, Field(ge=0)]
+    validator: Literal["w3c", "local"]
     w3c_errors: list[W3CError]
     has_doctype: bool
     semantic_elements_used: list[str]
-    semantic_element_count: int
-    div_count: int
-    span_count: int
+    semantic_element_count: Annotated[int, Field(ge=0)]
+    div_count: Annotated[int, Field(ge=0)]
+    span_count: Annotated[int, Field(ge=0)]
     div_to_semantic_ratio: float | None
-    inline_script_count: int
-    inline_style_count: int
-    inline_event_handler_count: int
-    comment_count: int
+    inline_script_count: Annotated[int, Field(ge=0)]
+    inline_style_count: Annotated[int, Field(ge=0)]
+    inline_event_handler_count: Annotated[int, Field(ge=0)]
+    comment_count: Annotated[int, Field(ge=0)]
     external_scripts: list[ExternalResource]
     external_stylesheets: list[ExternalResource]
-    cdn_count: int
+    cdn_count: Annotated[int, Field(ge=0)]
     frameworks_detected: list[str]
-    img_alt_coverage: float
-    form_label_coverage: float
+    img_alt_coverage: Annotated[float, Field(ge=0.0)]
+    form_label_coverage: Annotated[float, Field(ge=0.0)]
     has_lang_attr: bool
     has_title: bool
     heading_hierarchy_valid: bool
-    aria_attribute_count: int
-    ambiguous_link_count: int
+    aria_attribute_count: Annotated[int, Field(ge=0)]
+    ambiguous_link_count: Annotated[int, Field(ge=0)]
 
 
 class CSSMetrics(BaseModel):
     syntax_valid: bool
-    parse_error_count: int
-    validator: str  # "w3c" | "local"
+    parse_error_count: Annotated[int, Field(ge=0)]
+    validator: Literal["w3c", "local"]
     w3c_errors: list[W3CCSSError]
     w3c_warnings: list[W3CCSSError]
-    rule_count: int
-    selector_count: int
-    important_count: int
-    duplicate_selector_count: int
-    media_query_count: int
-    custom_property_count: int
-    comment_count: int
-    float_count: int
-    flexbox_count: int
-    grid_count: int
-    dominant_layout: str  # "float" | "flexbox" | "grid" | "mixed" | "none"
+    rule_count: Annotated[int, Field(ge=0)]
+    selector_count: Annotated[int, Field(ge=0)]
+    important_count: Annotated[int, Field(ge=0)]
+    duplicate_selector_count: Annotated[int, Field(ge=0)]
+    media_query_count: Annotated[int, Field(ge=0)]
+    custom_property_count: Annotated[int, Field(ge=0)]
+    comment_count: Annotated[int, Field(ge=0)]
+    float_count: Annotated[int, Field(ge=0)]
+    flexbox_count: Annotated[int, Field(ge=0)]
+    grid_count: Annotated[int, Field(ge=0)]
+    dominant_layout: Literal["float", "flexbox", "grid", "mixed", "none"]
     float_used_for_layout: bool
 
 
 class JSMetrics(BaseModel):
     syntax_valid: bool
-    parse_error_count: int
-    function_count: int
-    arrow_function_count: int
-    async_function_count: int
-    console_log_count: int
-    import_count: int
-    comment_coverage: float
-    todo_count: int
+    parse_error_count: Annotated[int, Field(ge=0)]
+    function_count: Annotated[int, Field(ge=0)]
+    arrow_function_count: Annotated[int, Field(ge=0)]
+    async_function_count: Annotated[int, Field(ge=0)]
+    console_log_count: Annotated[int, Field(ge=0)]
+    import_count: Annotated[int, Field(ge=0)]
+    comment_coverage: Annotated[float, Field(ge=0.0)]
+    todo_count: Annotated[int, Field(ge=0)]
 
 
 class TSMetrics(JSMetrics):
-    type_annotation_coverage: float
-    interface_count: int
-    type_alias_count: int
+    type_annotation_coverage: Annotated[float, Field(ge=0.0)]
+    interface_count: Annotated[int, Field(ge=0)]
+    type_alias_count: Annotated[int, Field(ge=0)]
 
 
 class SQLMetrics(BaseModel):
-    statement_count: int
+    statement_count: Annotated[int, Field(ge=0)]
     query_types: dict[str, int]
-    join_count: int
-    subquery_depth: int
+    join_count: Annotated[int, Field(ge=0)]
+    subquery_depth: Annotated[int, Field(ge=0)]
     unsafe_patterns: list[str]
 
 
 class CrossFileSignals(BaseModel):
-    file_count: int
+    file_count: Annotated[int, Field(ge=0)]
     languages_detected: list[str]
     import_graph: dict[str, list[str]]
     unrecognised_files: list[str]
@@ -146,7 +154,7 @@ class FileLLMSignals(BaseModel):
     comment_quality: str
     naming_quality: str
     style_guide: str | None
-    code_level: str  # "beginner" | "intermediate" | "advanced"
+    code_level: Literal["beginner", "intermediate", "advanced"]
     self_documenting_score: float
     suggestions: list[str]
 
