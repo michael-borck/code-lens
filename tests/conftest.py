@@ -1,7 +1,4 @@
 # tests/conftest.py
-import json
-import pytest
-
 VALID_PYTHON = '''\
 def greet(name: str) -> str:
     """Return a greeting."""
