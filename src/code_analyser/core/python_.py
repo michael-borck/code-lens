@@ -33,6 +33,17 @@ def analyse_python(source: str) -> PythonMetrics:
     blank_lines = sum(1 for ln in lines if not ln.strip())
     todo_count = sum(1 for ln in lines if _TODO_RE.search(ln))
 
+    has_main_guard = any(
+        isinstance(node, ast.If)
+        and isinstance(node.test, ast.Compare)
+        and isinstance(node.test.left, ast.Name)
+        and node.test.left.id == "__name__"
+        and len(node.test.comparators) == 1
+        and isinstance(node.test.comparators[0], ast.Constant)
+        and node.test.comparators[0].value == "__main__"
+        for node in tree.body
+    )
+
     visitor = _Visitor()
     visitor.visit(tree)
 
@@ -59,7 +70,7 @@ def analyse_python(source: str) -> PythonMetrics:
         todo_count=todo_count,
         print_count=visitor.print_count,
         type_annotation_coverage=type_cov,
-        has_main_guard=visitor.has_main_guard,
+        has_main_guard=has_main_guard,
         bare_except_count=visitor.bare_except_count,
         comprehension_count=visitor.comprehension_count,
     )
@@ -71,7 +82,6 @@ class _Visitor(ast.NodeVisitor):
         self.class_count = 0
         self.imports: list[str] = []
         self.print_count = 0
-        self.has_main_guard = False
         self.bare_except_count = 0
         self.comprehension_count = 0
         self.all_names: list[str] = []
@@ -119,15 +129,6 @@ class _Visitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_If(self, node: ast.If) -> None:
-        if (
-            isinstance(node.test, ast.Compare)
-            and isinstance(node.test.left, ast.Name)
-            and node.test.left.id == "__name__"
-            and len(node.test.comparators) == 1
-            and isinstance(node.test.comparators[0], ast.Constant)
-            and node.test.comparators[0].value == "__main__"
-        ):
-            self.has_main_guard = True
         self.generic_visit(node)
 
     def visit_ExceptHandler(self, node: ast.ExceptHandler) -> None:

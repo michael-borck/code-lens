@@ -73,3 +73,13 @@ def test_ruff_violations_shape():
         assert isinstance(v.code, str)
         assert isinstance(v.line, int)
         assert isinstance(v.message, str)
+
+
+def test_main_guard_not_triggered_by_nested_if():
+    source = '''\
+def foo():
+    if __name__ == "__main__":
+        pass
+'''
+    m = analyse_python(source)
+    assert m.has_main_guard is False
