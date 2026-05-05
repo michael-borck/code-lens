@@ -21,6 +21,7 @@ def _w3c_validate_css(source: str, timeout: float) -> tuple[list[W3CCSSError], l
 
 
 _LAYOUT_FLOAT_SELECTOR = re.compile(r"img|figure|picture", re.I)
+_MIXED_THRESHOLD = 0.8
 
 
 def _count_declarations(declarations, counters: dict) -> None:
@@ -50,7 +51,7 @@ def _dominant(floats: int, flex: int, grid: int) -> str:
     top = max(counts, key=lambda k: counts[k])
     top_val = counts[top]
     others = [v for k, v in counts.items() if k != top]
-    if any(top_val > 0 and o / top_val >= 0.8 for o in others if o > 0):
+    if any(top_val > 0 and o / top_val >= _MIXED_THRESHOLD for o in others if o > 0):
         return "mixed"
     return top
 

@@ -1,5 +1,4 @@
 import httpx
-import pytest
 from conftest import VALID_CSS, FLOAT_CSS
 from code_analyser.core.css_ import analyse_css
 
