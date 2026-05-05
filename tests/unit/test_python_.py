@@ -1,0 +1,75 @@
+# tests/unit/test_python_.py
+import pytest
+from conftest import VALID_PYTHON, PYTHON_WITH_ISSUES
+from code_analyser.core.python_ import analyse_python
+
+
+def test_valid_python_signals():
+    m = analyse_python(VALID_PYTHON)
+    assert m.syntax_valid is True
+    assert m.function_count == 2
+    assert m.has_main_guard is True
+    assert m.print_count == 1
+    assert m.comprehension_count == 1
+    assert m.type_annotation_coverage > 0.0
+    assert m.naming_convention == "snake_case"
+    assert m.bare_except_count == 0
+
+
+def test_invalid_python_returns_syntax_invalid():
+    m = analyse_python("def foo(:\n    pass\n")
+    assert m.syntax_valid is False
+    assert m.loc == 0
+
+
+def test_python_with_issues():
+    m = analyse_python(PYTHON_WITH_ISSUES)
+    assert m.syntax_valid is True
+    assert m.bare_except_count == 1
+    assert m.print_count == 1
+    assert m.todo_count == 1
+    assert m.has_main_guard is False
+
+
+def test_loc_counts():
+    source = "x = 1\n# comment\n\ny = 2\n"
+    m = analyse_python(source)
+    assert m.loc == 2
+    assert m.comment_lines == 1
+    assert m.blank_lines == 1
+
+
+def test_docstring_coverage():
+    source = '''\
+def with_doc():
+    """Has docstring."""
+    pass
+
+def no_doc():
+    pass
+'''
+    m = analyse_python(source)
+    assert m.docstring_coverage == pytest.approx(0.5)
+
+
+def test_imports():
+    source = "import os\nimport sys\nfrom pathlib import Path\n"
+    m = analyse_python(source)
+    assert "os" in m.imports
+    assert "sys" in m.imports
+    assert "pathlib" in m.imports
+
+
+def test_comprehensions():
+    source = "a = [x for x in range(10)]\nb = {k: v for k, v in items}\nc = (x for x in r)\n"
+    m = analyse_python(source)
+    assert m.comprehension_count == 3
+
+
+def test_ruff_violations_shape():
+    # ruff may or may not be installed; if it is, violations have code/line/message
+    m = analyse_python(PYTHON_WITH_ISSUES)
+    for v in m.lint_violations:
+        assert isinstance(v.code, str)
+        assert isinstance(v.line, int)
+        assert isinstance(v.message, str)
