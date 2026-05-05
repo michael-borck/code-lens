@@ -115,15 +115,18 @@ Validation: calls the **Nu HTML Checker API** (`validator.w3.org/nu/`) with the 
 - `span_count: int` — total `<span>` elements
 - `div_to_semantic_ratio: float` — `div_count / (div_count + semantic_element_count)`, 0–1. High values (>0.8) indicate "div soup". `null` if no divs or semantic elements present.
 
-- `inline_script_count: int`, `inline_style_count: int`
+- `inline_script_count: int` — `<script>` blocks without a `src` attribute
+- `inline_style_count: int` — `style="..."` attributes + `<style>` blocks
+- `inline_event_handler_count: int` — `onclick="..."`, `onchange="..."`, `onsubmit="..."` etc. (separation-of-concerns violation)
 - `comment_count: int`
 
-**External resources:**
+**External resources and framework detection:**
 - `external_scripts: list[{src, is_cdn, library}]` — all `<script src="...">` tags. `is_cdn: true` if src matches known CDN hostnames. `library` is the detected library name if recognisable (e.g. `"jquery"`, `"bootstrap"`, `"react"`, `"vue"`, `"tailwind"`, `"font-awesome"`) or `null`.
 - `external_stylesheets: list[{href, is_cdn, library}]` — all `<link rel="stylesheet" href="...">` tags, same CDN/library detection.
 - `cdn_count: int` — total CDN-hosted resources (scripts + stylesheets combined).
+- `frameworks_detected: list[str]` — libraries/frameworks fingerprinted across HTML + JS files via code-level patterns (not just CDN links): `"react"` (React.createElement, from 'react'), `"vue"` (new Vue(), from 'vue'), `"angular"` (ng-app, ng-controller), `"jquery"` ($(), jQuery), `"bootstrap"`, `"tailwind"`, `"svelte"`, `"bulma"`, `"materialize"`.
 
-CDN hostnames detected: `cdnjs.cloudflare.com`, `unpkg.com`, `cdn.jsdelivr.net`, `ajax.googleapis.com`, `cdn.tailwindcss.com`, `stackpath.bootstrapcdn.com`, `maxcdn.bootstrapcdn.com`, `code.jquery.com`, `cdn.bootcss.com`. New patterns can be added without changing the schema.
+CDN hostnames detected: `cdnjs.cloudflare.com`, `unpkg.com`, `cdn.jsdelivr.net`, `ajax.googleapis.com`, `cdn.tailwindcss.com`, `stackpath.bootstrapcdn.com`, `maxcdn.bootstrapcdn.com`, `code.jquery.com`. New patterns added without schema changes.
 
 **Static accessibility signals** (file-based, no browser needed):
 - `img_alt_coverage: float` (0–1, % of `<img>` with non-empty alt)
@@ -190,6 +193,8 @@ Always present — for single-file input, `import_graph` and `unrecognised_files
 - `languages_detected: list[str]`
 - `import_graph: dict[str, list[str]]` (filename → files it imports, best-effort)
 - `unrecognised_files: list[str]`
+- `has_package_json: bool` — signals use of a Node.js build toolchain
+- `frameworks_detected: list[str]` — aggregated across all files (HTML CDN links + JS code-level patterns)
 
 ### LLM signals (`llm.py`, `[llm]` extra)
 
