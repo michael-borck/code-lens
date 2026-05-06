@@ -1,4 +1,3 @@
-# src/code_analyser/cli.py
 from __future__ import annotations
 import argparse
 import os
@@ -6,7 +5,6 @@ import sys
 from pathlib import Path
 
 from .pipeline import CodeAnalyser
-from .models import CodeAnalysis
 
 
 def main() -> None:
