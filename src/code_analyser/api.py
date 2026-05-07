@@ -3,6 +3,7 @@ import tempfile
 import time
 from pathlib import Path
 
+from importlib.metadata import version
 from fastapi import FastAPI, File, HTTPException, UploadFile
 
 from .models import CodeAnalysis
