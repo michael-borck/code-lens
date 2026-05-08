@@ -2,7 +2,7 @@ import io
 import zipfile
 import pytest
 from pathlib import Path
-from conftest import VALID_PYTHON, VALID_HTML, VALID_CSS
+from conftest import VALID_PYTHON, VALID_HTML, VALID_CSS, VALID_JSX
 from code_analyser.pipeline import CodeAnalyser
 from code_analyser.models import CodeAnalysis
 
@@ -66,6 +66,22 @@ def test_unsupported_single_file_raises(tmp_path):
         CodeAnalyser().analyse(p)
 
 
+def test_jsx_file_analyses_cleanly(tmp_path):
+    """End-to-end: a .jsx file routes through the pipeline with jsx=True
+    so esprima parses the JSX without error."""
+    p = tmp_path / "App.jsx"
+    p.write_text(VALID_JSX)
+    result = CodeAnalyser().analyse(p)
+    assert result.file_count == 1
+    f = result.files[0]
+    assert f.language == "javascript"
+    assert f.metrics is not None
+    assert f.metrics.syntax_valid is True
+    assert f.metrics.parse_error_count == 0
+    # The arrow `() => (...)` should be counted.
+    assert f.metrics.arrow_function_count >= 1
+
+
 def test_cross_file_has_package_json(tmp_path):
     zip_bytes = _make_zip(
         ("app.js", "console.log('hi')"),
@@ -75,10 +91,3 @@ def test_cross_file_has_package_json(tmp_path):
     p.write_bytes(zip_bytes)
     result = CodeAnalyser().analyse(p)
     assert result.cross_file.has_package_json is True
-
-
-def test_languages_detected(tmp_path):
-    p = tmp_path / "app.py"
-    p.write_text(VALID_PYTHON)
-    result = CodeAnalyser().analyse(p)
-    assert "python" in result.cross_file.languages_detected

@@ -1,9 +1,12 @@
 # tests/unit/test_python_.py
+import shutil
+
 import pytest
 from conftest import VALID_PYTHON, PYTHON_WITH_ISSUES
 from code_analyser.core.python_ import analyse_python
 
 
+@pytest.mark.slow
 def test_valid_python_signals():
     m = analyse_python(VALID_PYTHON)
     assert m.syntax_valid is True
@@ -66,9 +69,17 @@ def test_comprehensions():
     assert m.comprehension_count == 3
 
 
+@pytest.mark.slow
 def test_ruff_violations_shape():
-    # ruff may or may not be installed; if it is, violations have code/line/message
+    """ruff is invoked as a subprocess in python_._run_ruff; skip when the
+    binary is not on PATH. PYTHON_WITH_ISSUES has bare except / unused
+    imports / etc., so when ruff IS available we expect at least one
+    violation — without that assertion the for-loop is vacuous.
+    """
+    if shutil.which("ruff") is None:
+        pytest.skip("ruff binary not on PATH; cannot exercise lint subprocess")
     m = analyse_python(PYTHON_WITH_ISSUES)
+    assert len(m.lint_violations) > 0
     for v in m.lint_violations:
         assert isinstance(v.code, str)
         assert isinstance(v.line, int)

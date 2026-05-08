@@ -14,10 +14,17 @@ _COMMENT_LINE_RE = re.compile(r"^\s*(?://|/\*|\*)", re.MULTILINE)
 
 
 def analyse_javascript(source: str, *, jsx: bool = False) -> JSMetrics:
+    """Analyse a JavaScript source string and return structural metrics.
+
+    When ``jsx=True``, esprima parses JSX expressions (e.g.
+    ``<Component prop={value}/>``).
+    """
     if not _ESPRIMA_AVAILABLE:
         return _fallback_metrics(source)
 
     opts = {"tolerant": True, "comment": True}
+    if jsx:
+        opts["jsx"] = True
     tree = None
     parse_failed = False
     try:

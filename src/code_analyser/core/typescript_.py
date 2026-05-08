@@ -26,6 +26,25 @@ _RETURN_TYPE_RE = re.compile(
 
 
 def analyse_typescript(source: str, *, tsx: bool = False) -> TSMetrics:
+    """Extract regex-based stats from a TypeScript source string.
+
+    This is a HEURISTIC analyser, not a real TS parser. It counts
+    declarations (functions, interfaces, type aliases, imports), notes
+    annotations and arrow expressions, and reports a coarse "looks like
+    syntactically balanced" check via brace counting.
+
+    For real TypeScript semantic analysis (proper type checking,
+    accurate syntax validity, JSX/TSX-aware parsing), a future release
+    will offer an optional [parser] extra using tree-sitter-typescript.
+    For now, the regex stats are useful as stats — they're not pretending
+    to be parsing.
+
+    The ``tsx`` parameter is currently unused (TSX requires a real
+    parser; the brace heuristic doesn't change with TSX).
+    """
+    # Heuristic: source is "structurally balanced" if open/close braces match
+    # within ±3. Not a real parse — a real parser would catch many things this
+    # misses (e.g. `function foo() { if (x { return; } }` passes).
     syntax_valid = abs(source.count("{") - source.count("}")) <= 3
 
     function_count = len(_FUNC_RE.findall(source))

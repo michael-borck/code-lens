@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "code-analyser"
-version = "1.0.2"
+version = "1.0.3"
 description = "Source code analyser — part of the analyser family"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -44,7 +44,10 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 pythonpath = ["src", "tests"]
-addopts = ["--cov=src/code_analyser", "--cov-report=term-missing", "--strict-markers"]
+addopts = "--cov=src/code_analyser --cov-report=term-missing --strict-markers -m 'not slow'"
+markers = [
+    "slow: tests that invoke external tools (ruff, html5lib parse, w3c) — opt-in with `pytest -m slow`",
+]
 
 [tool.ruff]
 target-version = "py310"

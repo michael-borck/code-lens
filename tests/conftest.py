@@ -77,6 +77,18 @@ const double = (x) => x * 2;
 const asyncLoad = async () => { return await fetch('/api'); };
 """
 
+VALID_JSX = """\
+import React from 'react';
+
+const App = () => (
+  <div className="app">
+    <h1>Hello, world</h1>
+  </div>
+);
+
+export default App;
+"""
+
 VALID_TS = """\
 import { Component } from '@angular/core';
 

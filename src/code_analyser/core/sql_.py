@@ -3,7 +3,8 @@ from __future__ import annotations
 import re
 
 import sqlparse
-from sqlparse.sql import Where
+from sqlparse.sql import Parenthesis, Where
+from sqlparse.tokens import DML, Punctuation
 
 from ..models import SQLMetrics
 
@@ -43,13 +44,48 @@ def analyse_sql(source: str) -> SQLMetrics:
     )
 
 
+def _paren_starts_with_select(token: Parenthesis) -> bool:
+    """True iff the first non-whitespace token after ``(`` is a SELECT DML."""
+    for t in token.flatten():
+        if t.is_whitespace:
+            continue
+        if t.ttype is Punctuation and t.value == "(":
+            continue
+        return t.ttype is DML and t.value.upper() == "SELECT"
+    return False
+
+
+def _walk(token, current_depth: int, current_max: int) -> int:
+    if isinstance(token, Parenthesis) and _paren_starts_with_select(token):
+        current_depth += 1
+        current_max = max(current_max, current_depth)
+    if hasattr(token, "tokens"):
+        for child in token.tokens:
+            current_max = _walk(child, current_depth, current_max)
+    return current_max
+
+
 def _max_subquery_depth(source: str) -> int:
-    depth = 0
+    """Return the maximum nesting depth of SELECT statements.
+
+    A top-level SELECT is depth 1. A subquery (a ``Parenthesis`` whose
+    first non-whitespace token is a SELECT keyword) inside another
+    SELECT is depth 2. Subquery-in-subquery is depth 3. Etc.
+
+    Walks the sqlparse token tree so that non-subquery parens — e.g.
+    ``VALUES (...)``, ``CAST(x AS y)``, or arithmetic ``(a + (b + c))`` —
+    do NOT inflate the count.
+    """
+    parsed = sqlparse.parse(source)
     max_depth = 0
-    for ch in source:
-        if ch == "(":
-            depth += 1
-            max_depth = max(max_depth, depth)
-        elif ch == ")":
-            depth = max(0, depth - 1)
+    for stmt in parsed:
+        # Top-level SELECT counts as depth 1.
+        for t in stmt.flatten():
+            if t.is_whitespace:
+                continue
+            if t.ttype is DML and t.value.upper() == "SELECT":
+                max_depth = max(max_depth, 1)
+            break
+        for tok in stmt.tokens:
+            max_depth = max(max_depth, _walk(tok, 1, max_depth))
     return max_depth

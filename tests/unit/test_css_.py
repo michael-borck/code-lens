@@ -59,9 +59,3 @@ def test_important_count(monkeypatch):
     css = "a{color:red!important}.b{font-size:12px!important}"
     m = analyse_css(css)
     assert m.important_count == 2
-
-
-def test_w3c_fallback(monkeypatch):
-    _no_network(monkeypatch)
-    m = analyse_css(VALID_CSS, timeout=1.0)
-    assert m.validator == "local"

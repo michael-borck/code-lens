@@ -11,14 +11,18 @@ from .pipeline import CodeAnalyser
 
 _start_time = time.time()
 
-app = FastAPI(title="code-analyser", version="1.0.0")
+app = FastAPI(title="code-analyser", version=version("code-analyser"))
 
 _analyser = CodeAnalyser()
 
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok", "uptime": round(time.time() - _start_time, 1)}
+    return {
+        "status": "ok",
+        "uptime": round(time.time() - _start_time, 1),
+        "version": version("code-analyser"),
+    }
 
 
 @app.post("/analyse", response_model=CodeAnalysis)

@@ -128,6 +128,13 @@ class JSMetrics(BaseModel):
 
 
 class TSMetrics(JSMetrics):
+    syntax_valid: bool = Field(
+        description=(
+            "For TypeScript, this is a brace-balance heuristic "
+            "(open vs close `{}` within ±3), NOT parser-based. "
+            "A real TS parser would catch syntax errors this misses."
+        ),
+    )
     type_annotation_coverage: Annotated[float, Field(ge=0.0)]
     interface_count: Annotated[int, Field(ge=0)]
     type_alias_count: Annotated[int, Field(ge=0)]

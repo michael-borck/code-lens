@@ -1,5 +1,7 @@
 import io
 import zipfile
+from importlib.metadata import version
+
 import pytest
 from fastapi.testclient import TestClient
 from conftest import VALID_PYTHON, VALID_HTML
@@ -17,6 +19,7 @@ def test_health(client):
     data = r.json()
     assert data["status"] == "ok"
     assert "uptime" in data
+    assert data["version"] == version("code-analyser")
 
 
 def test_analyse_python(client):

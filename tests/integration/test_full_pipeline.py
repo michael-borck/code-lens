@@ -14,6 +14,7 @@ def no_network(monkeypatch):
     monkeypatch.setattr("httpx.post", _raise)
 
 
+@pytest.mark.slow
 def test_full_zip_integration(tmp_path):
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as zf:
