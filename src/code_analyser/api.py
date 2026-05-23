@@ -6,6 +6,7 @@ from pathlib import Path
 from importlib.metadata import version
 from fastapi import FastAPI, File, HTTPException, UploadFile
 
+from .manifest import MANIFEST
 from .models import CodeAnalysis
 from .pipeline import CodeAnalyser
 
@@ -23,6 +24,11 @@ def health() -> dict:
         "uptime": round(time.time() - _start_time, 1),
         "version": version("code-analyser"),
     }
+
+
+@app.get("/manifest")
+def manifest() -> dict:
+    return MANIFEST
 
 
 @app.post("/analyse", response_model=CodeAnalysis)

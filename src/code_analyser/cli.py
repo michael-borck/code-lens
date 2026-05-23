@@ -12,6 +12,12 @@ def main() -> None:
         _serve(sys.argv[2:])
         return
 
+    if len(sys.argv) > 1 and sys.argv[1] == "manifest":
+        import json
+        from .manifest import MANIFEST
+        print(json.dumps(MANIFEST, indent=2))
+        return
+
     parser = argparse.ArgumentParser(
         prog="code-analyser",
         description="Source code signals analyser",
