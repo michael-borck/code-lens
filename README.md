@@ -2,7 +2,7 @@
 
 Analyses source code files and returns style violations, complexity metrics, and quality indicators. Designed as a low-level tool — feed it a file, get back structured JSON.
 
-Part of the [analyser family](#the-analyser-family).
+Part of the [analyser family](https://github.com/michael-borck/lens-analysers).
 
 > **Status**: Early development. Currently supports Python via ruff and basic AST metrics. Multi-language support and alignment with the family API pattern is in progress.
 
