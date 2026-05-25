@@ -1,34 +1,20 @@
 from __future__ import annotations
-import tempfile
-import time
-from pathlib import Path
 
-from importlib.metadata import version
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from lens_contract import add_contract_routes, add_cors, upload_tempfile
 
 from .manifest import MANIFEST
 from .models import CodeAnalysis
 from .pipeline import CodeAnalyser
 
-_start_time = time.time()
+app = FastAPI(title="code-analyser", version=MANIFEST["version"])
 
-app = FastAPI(title="code-analyser", version=version("code-analyser"))
+# GET /health and GET /manifest (the family contract, via lens-contract).
+add_contract_routes(app, MANIFEST)
+# CORS — env-driven: CODE_ANALYSER_MODE=desktop (Electron) or CODE_ANALYSER_ALLOWED_ORIGINS.
+add_cors(app, env_prefix="CODE_ANALYSER")
 
 _analyser = CodeAnalyser()
-
-
-@app.get("/health")
-def health() -> dict:
-    return {
-        "status": "ok",
-        "uptime": round(time.time() - _start_time, 1),
-        "version": version("code-analyser"),
-    }
-
-
-@app.get("/manifest")
-def manifest() -> dict:
-    return MANIFEST
 
 
 @app.post("/analyse", response_model=CodeAnalysis)
@@ -37,17 +23,10 @@ async def analyse(file: UploadFile = File(...)) -> CodeAnalysis:
     if not content:
         raise HTTPException(status_code=422, detail="Empty file")
 
-    suffix = Path(file.filename or "upload.py").suffix or ".py"
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-        tmp_path = Path(tmp.name)
-        tmp.write(content)
-
-    try:
-        result = _analyser.analyse(tmp_path)
-        return result
-    except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e)) from e
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
-    finally:
-        tmp_path.unlink(missing_ok=True)
+    with upload_tempfile(content, file.filename) as tmp_path:
+        try:
+            return _analyser.analyse(tmp_path)
+        except ValueError as e:
+            raise HTTPException(status_code=422, detail=str(e)) from e
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e)) from e

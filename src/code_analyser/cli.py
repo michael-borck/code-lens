@@ -1,6 +1,5 @@
 from __future__ import annotations
 import argparse
-import os
 import sys
 from pathlib import Path
 
@@ -8,14 +7,17 @@ from .pipeline import CodeAnalyser
 
 
 def main() -> None:
-    if len(sys.argv) > 1 and sys.argv[1] == "serve":
-        _serve(sys.argv[2:])
-        return
+    from lens_contract import run_contract_subcommands
 
-    if len(sys.argv) > 1 and sys.argv[1] == "manifest":
-        import json
-        from .manifest import MANIFEST
-        print(json.dumps(MANIFEST, indent=2))
+    from .manifest import MANIFEST
+
+    # `serve` and `manifest` are the family's shared subcommands (lens-contract).
+    if run_contract_subcommands(
+        MANIFEST,
+        app_path="code_analyser.api:app",
+        default_port=8004,
+        env_prefix="CODE_ANALYSER",
+    ):
         return
 
     parser = argparse.ArgumentParser(
@@ -105,10 +107,5 @@ def _summarise_metrics(metrics, language: str) -> str:
     return ""
 
 
-def _serve(argv: list[str]) -> None:
-    import uvicorn
-    parser = argparse.ArgumentParser(prog="code-analyser serve")
-    parser.add_argument("--port", type=int, default=int(os.getenv("CODE_ANALYSER_PORT", "8004")))
-    parser.add_argument("--host", default=os.getenv("CODE_ANALYSER_HOST", "127.0.0.1"))
-    args = parser.parse_args(argv)
-    uvicorn.run("code_analyser.api:app", host=args.host, port=args.port)
+if __name__ == "__main__":
+    main()
