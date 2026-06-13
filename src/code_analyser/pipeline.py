@@ -3,6 +3,7 @@ import zipfile
 from pathlib import Path
 
 from .detect import detect_language
+from .embedding import embed_document
 from .models import (
     CodeAnalysis, CrossFileSignals, FileAnalysis,
     FileLLMSignals, TopLevelLLMSignals,
@@ -79,6 +80,9 @@ class CodeAnalyser:
             frameworks_detected=sorted(all_frameworks),
         )
 
+        combined_source = "\n\n".join(_decode(content) for _, content in pairs)
+        embedding = embed_document(combined_source)
+
         return CodeAnalysis(
             input=path.name,
             file_count=len(files),
@@ -86,6 +90,7 @@ class CodeAnalyser:
             files=files,
             cross_file=cross,
             llm_signals=llm_top,
+            embedding=embedding,
         )
 
 

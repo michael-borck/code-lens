@@ -191,3 +191,6 @@ class CodeAnalysis(BaseModel):
     files: list[FileAnalysis]
     cross_file: CrossFileSignals
     llm_signals: TopLevelLLMSignals | None = None
+    # Pooled, L2-normalised source vector from lens-embed (pinned all-MiniLM-L6-v2).
+    # Comparable across members; None unless [embeddings] installed.
+    embedding: list[float] | None = None

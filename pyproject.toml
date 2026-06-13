@@ -26,6 +26,9 @@ dependencies = [
 
 [project.optional-dependencies]
 llm = ["anthropic>=0.7.0"]
+embeddings = [
+    "lens-embed[text]>=0.1.1",
+]
 dev = [
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
@@ -37,6 +40,7 @@ dev = [
 # the published wheel, which keeps the plain `lens-contract>=0.2.0` PyPI pin.
 [tool.uv.sources]
 lens-contract = { path = "../lens-contract", editable = true }
+lens-embed = { path = "../lens-embed", editable = true }
 
 [project.scripts]
 code-analyser = "code_analyser.cli:main"
